@@ -1,0 +1,60 @@
+--=========================================================================
+-- Exercise 2
+--=========================================================================
+
+--=========================================================================
+-- PROPERTIES OF FIFO
+--=========================================================================
+-- This file is not a standalone NuSMV file: it is to be included in
+-- fifo.smv or fifo-fixed.smv.
+
+-- The LTL properties in this file are numbered.  To have
+-- NuSMV check just the property numbered <p>, run it with the added
+-- option -n <p>.
+
+---------------------------------------------------------------------------
+-- Section 2.1, LTL Properties
+---------------------------------------------------------------------------
+
+
+--0: (a)
+
+LTLSPEC
+  G (! (full & empty) ) ;
+
+--1: (b)
+
+LTLSPEC
+  (G F (write) & F G (!read)) -> F full;
+
+
+--2: (c)
+
+LTLSPEC
+  G (wr_data = 0ub1_1 & write & !full & ( G F read ) -> F (rd_data = 0ub1_1) ) ;
+
+
+--3: (d)
+
+LTLSPEC
+   G (wr_data = data1 & write & !full & ( G F read ) -> F (rd_data = data1) ) ;
+
+
+--4: (e)
+
+LTLSPEC
+  TRUE;
+
+--5: (f)
+
+LTLSPEC
+  TRUE;
+
+---------------------------------------------------------------------------
+-- Section 2.2, LTL Property showing bug
+---------------------------------------------------------------------------
+
+--6:
+LTLSPEC
+  FALSE;
+

@@ -1,0 +1,113 @@
+MODULE floor(inButton, exButton, arrive)
+    -- Model of a floor
+    VAR
+        requested : boolean;
+    ASSIGN
+        init(requested) := FALSE;
+        next(requested) := case
+            arrive              : FALSE;
+            inButton | exButton : TRUE;
+            TRUE                : requested;
+        esac;
+    DEFINE
+        floor := requested;
+
+MODULE person(doorOpen)
+    -- Model of the person
+    VAR
+        present     : boolean;
+        inButton0   : boolean;
+        inButton1   : boolean;
+        inButton2   : boolean;
+        openButton  : boolean;
+    ASSIGN
+        inButton0  := present ? {TRUE, FALSE} : FALSE;
+        inButton1  := present ? {TRUE, FALSE} : FALSE;
+        inButton2  := present ? {TRUE, FALSE} : FALSE;
+        openButton := present & !doorOpen ? {TRUE, FALSE} : FALSE;
+        init(present) := FALSE;        
+        next(present) := case
+            doorOpen    : {TRUE, FALSE};
+            TRUE        : present; 
+        esac; 
+    DEFINE
+        passengerPresent := present;
+        
+MODULE elevator(command)
+    -- Model of the elevator
+    VAR
+        mode    : {idle, up, down};
+        floor   : -5..5;
+    ASSIGN
+        init(mode) := idle;
+        next(mode) := case
+            mode = idle & command = up   : up;
+            mode = idle & command = down : down;
+            mode = up & command = stop   : idle;
+            mode = up & command = down   : down;
+            mode = down & command = stop : idle;
+            mode = up & command = down   : down;
+            TRUE                         : mode;
+        esac;
+        init(floor) := 0;
+        next(floor) := case
+            mode = up & command = up & floor < 5 : floor + 1;
+            mode = up & command = absent & floor < 5 : floor + 1;
+            mode = down & command = down & floor > -5 : floor - 1;
+            mode = down & command = absent & floor > -5 : floor - 1;
+            TRUE : floor;
+        esac;
+    DEFINE
+        position := floor;
+        arrive0 := floor = 0;
+        arrive1 := floor = 1;
+        arrive2 := floor = 2;
+        resetCnt := mode = idle & (command = up | command = down);
+
+MODULE door(openButton, openDoor, resetCnt)
+    -- Model of the door
+    VAR
+        open : boolean;
+        cnt  : 0..5;
+    ASSIGN
+        init(open) := TRUE;
+        next(open) := case
+            openButton & cnt < 2    : TRUE;
+            openDoor                : TRUE;
+            TRUE                    : open;
+        esac;
+        init(cnt) := 0;
+        next(cnt) := case
+            resetCnt                : 0;
+            openButton & cnt < 2    : cnt + 1;
+            TRUE                    : cnt;
+        esac;
+    DEFINE
+        doorOpen := open;
+        
+MODULE dummyController(floor0, floor1, floor2, position, doorOpen, passengerPresent)
+    -- Model of a "dummy" controller
+    -- that nondeterministically generate all possible outputs
+    VAR
+        command : {absent, stop, up, down};
+        openDoor : boolean;
+    ASSIGN
+        command := {absent, stop, up, down};
+        openDoor := {TRUE, FALSE};
+        
+MODULE main
+    -- Composition of train_W, train_E and controller
+    IVAR
+        exButton0   : boolean;
+        exButton1   : boolean;
+        exButton2   : boolean;
+    VAR
+        fl0     : floor(pers.inButton0, exButton0, elev.arrive0);
+        fl1     : floor(pers.inButton1, exButton1, elev.arrive1);
+        fl2     : floor(pers.inButton2, exButton2, elev.arrive2);
+        pers    : person(dr.doorOpen);
+        elev    : elevator(cntr.command);
+        dr      : door(pers.openButton, cntr.openDoor, elev.resetCnt);
+        cntr    : dummyController(fl0.floor, fl1.floor, fl2.floor, elev.position, dr.doorOpen, pers.passengerPresent);
+
+INVARSPEC (elev.mode = up | elev.mode = down) -> dr.cnt = 0

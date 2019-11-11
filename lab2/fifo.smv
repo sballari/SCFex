@@ -1,0 +1,68 @@
+--=========================================================================
+-- Exercise 2
+--=========================================================================
+
+--=========================================================================
+-- Secs 2.1 and 2.2: Verifying and fixing a FIFO model
+--=========================================================================
+
+-- For Sec 2.1:
+-- Run NuSMV on this file.  At its end, it includes the fifo-properties.smv
+-- file where you should enter all the requested LTL and CTL properties.
+
+-- For Sec 2.2:
+-- 1. Make a copy named fifo-fixed.smv of this file fifo.smv.
+-- 2. Enter your fix to the bug in the model in fifo-fixed.smv.  Do not
+--    alter fifo.smv.
+
+#define DEPTH 5
+#define WIDTH 1
+#define WORD word[WIDTH]
+
+MODULE main
+  VAR
+  -- Internal state
+    buffer : array 0 .. (DEPTH-1) of WORD;
+    rd_p: 0 .. DEPTH-1;
+    wr_p: 0 .. DEPTH-1;
+    empty : boolean;  -- Also an output.
+  -- Inputs
+    write : boolean;
+    wr_data : WORD;
+    read : boolean;
+
+  FROZENVAR
+  -- For use in specifications to capture and refer to data values
+     data1 : WORD;
+     data2 : WORD;
+  DEFINE
+  -- Outputs
+    full := !empty & (rd_p = wr_p);
+    rd_data := buffer[rd_p];
+  ASSIGN
+    init(rd_p) := 0;
+    init(wr_p) := 0;
+    init(empty) := TRUE;
+    -- No init statement for buffer.  Values in buffer at start
+    -- left unconstrained.
+
+    next(rd_p) := read & !empty ? (rd_p + 1) mod DEPTH : rd_p;
+    next(wr_p) := write & !full ? (wr_p + 1) mod DEPTH : wr_p;
+
+    next(empty) :=
+      case
+        empty & write : FALSE;
+        (rd_p + 1) mod DEPTH = wr_p & read: TRUE;
+        TRUE : empty;
+      esac;
+
+    next(buffer[0]) := wr_p = 0 & write & !full  ?  wr_data : buffer[0];
+    next(buffer[1]) := wr_p = 1 & write & !full  ?  wr_data : buffer[1];
+    next(buffer[2]) := wr_p = 2 & write & !full  ?  wr_data : buffer[2];
+    next(buffer[3]) := wr_p = 3 & write & !full  ?  wr_data : buffer[3];
+    next(buffer[4]) := wr_p = 4 & write & !full  ?  wr_data : buffer[4];
+
+
+
+
+#include "fifo-properties.smv"
