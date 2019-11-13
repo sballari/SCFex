@@ -9,17 +9,6 @@ def spec_to_bdd(model, spec):
     bddspec = pynusmv.mc.eval_ctl_spec(model, spec)
     return bddspec
 
-
-def reachability(phi):
-    reach = fsm.init
-    new = fsm.init
-    while new.size != 0 :
-        if new*spec.size !=0 : return True # set of stast that satisfies spec
-        #else
-        new = fsm.post(new) - reach
-        reach = reach + new
-    return False
-
 def check_explain_inv_spec(spec):
     """
     Return whether the loaded SMV model satisfies or not the invariant
