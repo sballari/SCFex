@@ -10,7 +10,7 @@ def spec_to_bdd(model, spec):
     return bddspec
 
 
-def reacheability(phi):
+def reachability(phi):
     reach = fsm.init
     new = fsm.init
     while new.size != 0 :
@@ -57,7 +57,6 @@ def check_explain_inv_spec(spec):
             counterexample = path_to(fsm,reach,unhappy_state)
 
         new = fsm.post(new) - reach
-        fsm.pre
         reach = reach + new 
 
     return (not found_unhappy_state,counterexample)
