@@ -52,7 +52,7 @@ def check_explain_inv_spec(spec):
 
 def path_to(fsm, reach, state_bdd):
     
-    #if state_bdd == None or fsm.count_states(state_bdd)==0: return []
+    if fsm.count_states(state_bdd) == 0 : raise Exception('no reachable state')
     i = fsm.count_states(state_bdd * fsm.init)
     if i>0 : 
         return [state_bdd.get_str_values()]
