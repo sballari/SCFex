@@ -3,3 +3,10 @@ Property !(train_w.mode = bridge & train_e.mode = bridge) is an INVARSPEC.
 Invariant is not respected
 [{'train_w.mode': 'away', 'train_w.out': 'arrive', 'train_e.mode': 'away', 'train_e.out': 'arrive', 'contr.signal_e': 'green', 'contr.signal_w': 'green', 'contr.west': 'green', 'contr.east': 'green'}, {'train_w.mode': 'wait', 'train_w.out': 'none', 'train_e.mode': 'wait', 'train_e.out': 'none', 'contr.signal_e': 'green', 'contr.signal_w': 'red', 'contr.west': 'red', 'contr.east': 'green'}, {'train_w.mode': 'wait', 'train_w.out': 'none', 'train_e.mode': 'bridge', 'train_e.out': 'leave', 'contr.signal_e': 'green', 'contr.signal_w': 'red', 'contr.west': 'red', 'contr.east': 'green'}, {'train_w.mode': 'wait', 'train_w.out': 'none', 'train_e.mode': 'away', 'train_e.out': 'arrive', 'contr.signal_e': 'green', 'contr.signal_w': 'green', 'contr.west': 'green', 'contr.east': 'green'}, {'train_w.mode': 'bridge', 'train_w.out': 'none', 'train_e.mode': 'wait', 'train_e.out': 'none', 'contr.signal_e': 'green', 'contr.signal_w': 'red', 'contr.west': 'red', 'contr.east': 'green'}, {'train_w.mode': 'bridge', 'train_w.out': 'none', 'train_e.mode': 'bridge', 'train_e.out': 'none', 'contr.signal_e': 'green', 'contr.signal_w': 'red', 'contr.west': 'red', 'contr.east': 'green'}]
 
+
+
+
+>>python3 inv_mc.py "rail_road.smv" 
+Property !(train_w.mode = bridge & train_e.mode = bridge) is an INVARSPEC.
+Invariant is respected
+

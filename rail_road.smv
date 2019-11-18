@@ -1,0 +1,64 @@
+MODULE train(signal)
+    -- Model of the train
+    VAR
+        mode : {away, wait, bridge};
+        out : {none, arrive, leave};
+    ASSIGN
+        init(mode) := away;
+        out := case
+            mode = away     : {none, arrive};
+            mode = bridge   : {none, leave};
+            TRUE            : none;
+        esac;
+        next(mode) := case
+            mode = away & out = arrive      : wait;
+            mode = wait & signal = green    : bridge;
+            mode = bridge & out = leave     : away;
+            TRUE                            : mode;
+        esac;
+
+MODULE controller(out_w, out_e)
+    -- Model of the wrong controller
+    VAR
+        west    : {green, red};
+        east    : {green, red};
+        near_w  : boolean;
+        near_e  : boolean;
+    ASSIGN
+        init(west) := red;
+        init(east) := red;
+        init(near_w) := FALSE;
+        init(near_e) := FALSE;
+        next(near_w) := case
+            out_w = arrive  : TRUE;
+            out_w = leave   : FALSE;
+            TRUE            : near_w;
+        esac;
+        next(near_e) := case
+            out_e = arrive  : TRUE;
+            out_e = leave   : FALSE;
+            TRUE            : near_e;
+        esac;
+        next(east) := case
+            !next(near_e)   : red;
+            next(near_e) & west = red   : green;
+            TRUE            : east;
+        esac;
+        next(west) := case
+            !next(near_w)  : red;
+            next(near_w) & next(east) = red   : green;
+            TRUE            : west;
+        esac;
+    DEFINE
+        signal_w := west;
+        signal_e := east;
+
+MODULE main
+    -- Composition of train_W, train_E and controller
+    VAR
+        train_w : train(contr.signal_w);
+        train_e : train(contr.signal_e);
+        contr   : controller(train_w.out, train_e.out);
+
+INVARSPEC !(train_w.mode = bridge & train_e.mode = bridge)
+
