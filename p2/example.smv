@@ -8,7 +8,5 @@ MODULE main
         next(x) := x xor y;
         next(y) := y;
 
-LTLSPEC G F x
-LTLSPEC G F !x
-LTLSPEC F G x
-LTLSPEC F G !x
+INVARSPEC x
+INVARSPEC !x

@@ -34,9 +34,9 @@ def check_repeatedly(spec):
 
     The result is a boolean telling whether `spec` is recurrent or not.
     """
-    #ltlspec = pynusmv.prop.g(pynusmv.prop.f(spec))
-    #res = pynusmv.mc.check_ltl_spec(ltlspec)
-    #return res
+    # ltlspec = pynusmv.prop.g(pynusmv.prop.f(spec))
+    # res = pynusmv.mc.check_ltl_spec(ltlspec)
+    # return res
     
     fsm = pynusmv.glob.prop_database().master.bddFsm
     spec = spec_to_bdd(fsm,spec)
@@ -62,11 +62,11 @@ pynusmv.init.init_nusmv()
 filename = sys.argv[1]
 pynusmv.glob.load_from_file(filename)
 pynusmv.glob.compute_model()
-ltltype = pynusmv.prop.propTypes['LTL']
+invtype = pynusmv.prop.propTypes['Invariant']
 for prop in pynusmv.glob.prop_database():
     spec = prop.expr
-    if prop.type == ltltype :
-        print("Property", spec, "is an LTLSPEC.")
+    if prop.type == invtype :
+        print("Property", spec, "is an INVSPEC.")
         res = check_persistently(spec)
         if res == True:
             print("Property is persistent")
