@@ -1,6 +1,14 @@
 import pynusmv
 import sys
 
+def reacheability(fsm):
+    reach = fsm.init
+    new = fsm.init
+    while fsm.count_states(new) != 0 :
+        new = fsm.post(new) - reach
+        reach = reach + new
+    return reach
+
 def spec_to_bdd(model, spec):
     """
     Return the set of states of `model` satisfying `spec`, as a BDD.
@@ -26,9 +34,22 @@ def check_repeatedly(spec):
 
     The result is a boolean telling whether `spec` is recurrent or not.
     """
-    ltlspec = pynusmv.prop.g(pynusmv.prop.f(spec))
-    res = pynusmv.mc.check_ltl_spec(ltlspec)
-    return res
+    #ltlspec = pynusmv.prop.g(pynusmv.prop.f(spec))
+    #res = pynusmv.mc.check_ltl_spec(ltlspec)
+    #return res
+    fsm = pynusmv.glob.prop_database().master.bddFsm
+    reach = reacheability(fsm)
+    recur = reach * spec
+    while (fsm.count_states(recur) != 0):
+        reach = pynusmv.dd.BDD.false()
+        new = fsm.pre(recur)
+        while (fsm.count_states(new) != 0):
+            reach = reach + new 
+            if ( recur * reach == recur ):
+                return True
+            new = fsm.pre(new) - reach
+        recur = recur * reach
+    return False
 
 
 if len(sys.argv) != 2:
