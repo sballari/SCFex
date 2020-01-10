@@ -1,0 +1,14 @@
+MODULE main
+    VAR
+        x : boolean;
+        y : boolean;
+    ASSIGN
+        init(x) := {TRUE, FALSE};
+        init(y) := {TRUE, FALSE};
+        next(x) := x xor y;
+        next(y) := y;
+
+LTLSPEC G F x
+LTLSPEC G F !x
+LTLSPEC F G x
+LTLSPEC F G !x
