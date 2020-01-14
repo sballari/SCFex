@@ -23,9 +23,9 @@ def check_persistently(spec):
 
     The result is a boolean telling whether `spec` is persistent.
     """
-    ltlspec = pynusmv.prop.f(pynusmv.prop.g(spec))
-    res = pynusmv.mc.check_ltl_spec(ltlspec)
-    return res
+    fsm = pynusmv.glob.prop_database().master.bddFsm
+    spec = spec_to_bdd(fsm,spec)
+    return not RSA(~spec)
 
 def check_repeatedly(spec):
     """
@@ -34,12 +34,13 @@ def check_repeatedly(spec):
 
     The result is a boolean telling whether `spec` is recurrent or not.
     """
-    # ltlspec = pynusmv.prop.g(pynusmv.prop.f(spec))
-    # res = pynusmv.mc.check_ltl_spec(ltlspec)
-    # return res
-    
     fsm = pynusmv.glob.prop_database().master.bddFsm
     spec = spec_to_bdd(fsm,spec)
+    return not PSA(~spec)
+  
+def RSA(spec):
+    
+    fsm = pynusmv.glob.prop_database().master.bddFsm
     reach = reacheability(fsm)
     recur = reach * spec
     while (fsm.count_states(recur) != 0):
@@ -53,6 +54,21 @@ def check_repeatedly(spec):
         recur = recur * reach
     return False
 
+def PSA(spec):
+    
+    fsm = pynusmv.glob.prop_database().master.bddFsm
+    reach = reacheability(fsm)
+    recur = reach * spec
+    while (fsm.count_states(recur) != 0):
+        reach = pynusmv.dd.BDD.false()
+        new = fsm.pre(recur) * spec
+        while (fsm.count_states(new) != 0):
+            reach = reach + new 
+            if ( recur * reach == recur ):  #recur == reach
+                return True
+            new = (fsm.pre(new)*spec) - reach
+        recur = recur * reach
+    return False
 
 if len(sys.argv) != 2:
     print("Usage:", sys.argv[0], "filename.smv")
